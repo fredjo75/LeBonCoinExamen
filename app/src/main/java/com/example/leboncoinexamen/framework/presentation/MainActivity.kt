@@ -1,11 +1,14 @@
-package com.example.leboncoinexamen
+package com.example.leboncoinexamen.framework.presentation
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import com.example.leboncoinexamen.R
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        (application as MyApplication).getApplicationComponent()?.inject(this)
+
     }
 }
