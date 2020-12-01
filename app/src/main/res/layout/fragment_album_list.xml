@@ -16,8 +16,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingStart="@dimen/margin2"
+        android:scrollbarStyle="outsideOverlay"
         android:paddingEnd="@dimen/margin2"
-        android:scrollbars="vertical"
         app:layoutManager="LinearLayoutManager"
         tools:context=".framework.presentation.album.AlbumFragment"
         tools:listitem="@layout/item_album" />

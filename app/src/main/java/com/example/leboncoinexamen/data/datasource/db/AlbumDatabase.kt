@@ -5,7 +5,9 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.leboncoinexamen.data.datasource.db.model.DbAlbum
+import javax.inject.Singleton
 
+@Singleton
 @Database(entities = [DbAlbum::class], version = 1, exportSchema = false)
 abstract class AlbumDatabase : RoomDatabase() {
 

@@ -13,21 +13,27 @@ import com.example.leboncoinexamen.framework.presentation.MyApplication
 import com.example.leboncoinexamen.framework.presentation.common.ViewModelFactory
 import dagger.Module
 import dagger.Provides
-
+import javax.inject.Singleton
 
 @Module
-class ApplicationModule(private val myApplication: MyApplication) {
+object ApplicationModule {
 
+    @Singleton
+    @JvmStatic
     @Provides
-    fun provideAlbumDatabaseDOA(): AlbumDatabaseDOA {
+    fun provideAlbumDatabaseDOA(myApplication: MyApplication): AlbumDatabaseDOA {
         return AlbumDatabase.getDatabase(myApplication).albumDatabaseDOA
     }
 
+    @Singleton
+    @JvmStatic
     @Provides
     fun provideAlbumApiService(): AlbumApiService {
         return AlbumApi.retrofitService
     }
 
+    @Singleton
+    @JvmStatic
     @Provides
     fun provideAlbumRepository(
         albumDao: AlbumDatabaseDOA,
@@ -41,6 +47,8 @@ class ApplicationModule(private val myApplication: MyApplication) {
         )
     }
 
+    @Singleton
+    @JvmStatic
     @Provides
     fun provideAlbumListViewModelFactory(
         albumRepository: AlbumRepository

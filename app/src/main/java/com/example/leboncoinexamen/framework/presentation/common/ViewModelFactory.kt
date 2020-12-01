@@ -26,7 +26,7 @@ constructor(
             }
 
             PhotoViewModel::class.java -> {
-                AlbumViewModel(
+                PhotoViewModel(
                     albumRepository = albumRepository
                 ) as T
             }

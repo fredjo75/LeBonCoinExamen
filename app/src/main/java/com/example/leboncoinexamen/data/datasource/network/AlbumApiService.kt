@@ -7,6 +7,7 @@ import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.GET
+import javax.inject.Singleton
 
 private const val BASE_URL = "https://static.leboncoin.fr/"
 
@@ -24,6 +25,7 @@ interface AlbumApiService {
     fun getAlbums(): Call<List<NetworkAlbum>>
 }
 
+@Singleton
 object AlbumApi {
     val retrofitService: AlbumApiService by lazy {
         retrofit.create(AlbumApiService::class.java)

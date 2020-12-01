@@ -11,18 +11,17 @@
         android:label="fragment_album_list"
         tools:layout="@layout/fragment_album_list">
         <action
-            android:id="@+id/action_albumFragment_to_photoFragment2"
-            app:destination="@id/photoFragment" />
+            android:id="@+id/action_albumFragment_to_photoPagerFragment"
+            app:destination="@id/photoPagerFragment" />
     </fragment>
     <fragment
-        android:id="@+id/photoFragment"
-        android:name="com.example.leboncoinexamen.framework.presentation.photo.PhotoFragment"
-        android:label="fragment_photo"
-        tools:layout="@layout/fragment_photo" >
+        android:id="@+id/photoPagerFragment"
+        android:name="com.example.leboncoinexamen.framework.presentation.photo.PhotoPagerFragment"
+        android:label="fragment_pager_photo"
+        tools:layout="@layout/fragment_photo_pager" >
         <argument
             android:name="selectedAlbum"
-            app:argType="integer"
-            android:defaultValue="0" />
+            app:argType="com.example.leboncoinexamen.domain.model.Album" />
     </fragment>
 
     <!--    <fragment

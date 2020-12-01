@@ -15,6 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.lang.String
 
 class AlbumAdapter(private val context: Context, private val listener: AlbumClickListener) :
     ListAdapter<DataItem, RecyclerView.ViewHolder>(AlbumDiffCallback()) {
@@ -65,9 +66,6 @@ class AlbumAdapter(private val context: Context, private val listener: AlbumClic
         }
     }
 
-    override fun getItemCount(): Int {
-        return super.getItemCount()
-    }
     class TextViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         var header: TextView
         fun bind(albumId: Int) {
@@ -92,14 +90,18 @@ class AlbumAdapter(private val context: Context, private val listener: AlbumClic
         //var progress: ProgressBar
 
         fun bind(item: Album, clickListener: AlbumClickListener) {
-            var img: ImageView? = image
-            if (img == null) {
-                img = ImageView(view.context)
-            }
 
-            Picasso.get().load(item.thumbnailUrl).placeholder(R.drawable.ic_launcher_foreground)
-                .into(img)
-            view.setOnClickListener { clickListener.onClick(item) }
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                image.transitionName = String.valueOf(item.id)
+            }
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                Picasso.get().load(item.thumbnailUrl).placeholder(R.drawable.ic_launcher_foreground)
+                    .into(image)
+            } else {
+                Picasso.get().load(item.thumbnailUrl).placeholder(R.drawable.ic_android)
+                    .into(image)
+            }
+            view.setOnClickListener { clickListener.onClick(image, item) }
 
         }
 
@@ -118,8 +120,8 @@ class AlbumAdapter(private val context: Context, private val listener: AlbumClic
         }
     }
 
-    class AlbumClickListener(val clickListener: (album: Album) -> Unit) {
-        fun onClick(album: Album) = clickListener(album)
+    class AlbumClickListener(val clickListener: (view: View, album: Album) -> Unit) {
+        fun onClick(view: View, album: Album) = clickListener(view, album)
     }
 
     fun addheaders(list: List<DataItem>): List<DataItem> {
