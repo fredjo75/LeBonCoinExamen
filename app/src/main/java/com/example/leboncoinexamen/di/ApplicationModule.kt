@@ -3,8 +3,8 @@ package com.example.leboncoinexamen.di
 import androidx.lifecycle.ViewModelProvider
 import com.example.leboncoinexamen.data.datasource.db.AlbumDatabase
 import com.example.leboncoinexamen.data.datasource.db.AlbumDatabaseDOA
-import com.example.leboncoinexamen.data.network.AlbumApi
-import com.example.leboncoinexamen.data.network.AlbumApiService
+import com.example.leboncoinexamen.data.datasource.network.AlbumApi
+import com.example.leboncoinexamen.data.datasource.network.AlbumApiService
 import com.example.leboncoinexamen.data.oop.mapper.DBDataMapper
 import com.example.leboncoinexamen.data.oop.mapper.NetworkDataMapper
 import com.example.leboncoinexamen.data.reporitory.AlbumRepositoryImpl

@@ -6,17 +6,14 @@ import com.example.leboncoinexamen.framework.presentation.album.AlbumFragment
 import com.example.leboncoinexamen.framework.presentation.photo.PhotoPagerFragment
 import dagger.BindsInstance
 import dagger.Component
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import javax.inject.Singleton
 
-@ExperimentalCoroutinesApi
-@FlowPreview
+
 @Singleton
 @Component(modules = [ApplicationModule::class])
 interface ApplicationComponent {
     @Component.Factory
-    interface Factory{
+    interface Factory {
 
         fun create(@BindsInstance app: MyApplication): ApplicationComponent
     }

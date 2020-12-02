@@ -1,4 +1,4 @@
-package com.example.leboncoinexamen.data.network
+package com.example.leboncoinexamen.data.datasource.network
 
 import com.example.leboncoinexamen.data.datasource.network.model.NetworkAlbum
 import com.squareup.moshi.Moshi

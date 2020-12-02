@@ -2,13 +2,12 @@ package com.example.leboncoinexamen.data.reporitory
 
 import android.util.Log
 import androidx.annotation.WorkerThread
-import androidx.arch.core.util.Function
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
 import com.example.leboncoinexamen.data.datasource.db.AlbumDatabaseDOA
 import com.example.leboncoinexamen.data.datasource.db.model.DbAlbum
+import com.example.leboncoinexamen.data.datasource.network.AlbumApiService
 import com.example.leboncoinexamen.data.datasource.network.model.NetworkAlbum
-import com.example.leboncoinexamen.data.network.AlbumApiService
 import com.example.leboncoinexamen.data.oop.mapper.Mapper
 import com.example.leboncoinexamen.domain.model.Album
 import com.example.leboncoinexamen.domain.repositories.AlbumRepository
@@ -21,24 +20,22 @@ import javax.inject.Singleton
 
 @Singleton
 class AlbumRepositoryImpl @Inject constructor(
-    var albumDao: AlbumDatabaseDOA,
-    var albumApiService: AlbumApiService,
-    var dbMapper: Mapper<DbAlbum, Album>,
-    var networkMapper: Mapper<NetworkAlbum, DbAlbum>,
+    private var albumDao: AlbumDatabaseDOA,
+    private var albumApiService: AlbumApiService,
+    private var dbMapper: Mapper<DbAlbum, Album>,
+    private var networkMapper: Mapper<NetworkAlbum, DbAlbum>,
 ) : AlbumRepository {
 
     companion object {
         private const val TAG: String = "AlbumRepositoryImpl"
     }
 
+    init {
+        GlobalScope.launch { fetchAlbums() }
+    }
+
     override val allAlbums: LiveData<List<Album>> =
-        Transformations.map(
-            albumDao.getAll(), Function { list ->
-                list.map {
-                    dbMapper.map(it)
-                }
-            }
-        )
+        Transformations.map(albumDao.getAll()) { list -> list.map { dbMapper.map(it) } }
 
     @WorkerThread
     private fun refreshAlbums(albums: List<NetworkAlbum>) {

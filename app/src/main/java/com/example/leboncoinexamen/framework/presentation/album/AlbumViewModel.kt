@@ -1,12 +1,9 @@
 package com.example.leboncoinexamen.framework.presentation.album
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.arch.core.util.Function
+import androidx.lifecycle.*
 import com.example.leboncoinexamen.domain.model.Album
 import com.example.leboncoinexamen.domain.repositories.AlbumRepository
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -14,26 +11,40 @@ import javax.inject.Singleton
 class AlbumViewModel
 @Inject
 constructor(
-    private val albumRepository: AlbumRepository
+    albumRepository: AlbumRepository
 ) : ViewModel() {
 
-    private val _status = MutableLiveData<AlbumApiStatus>()
-    val status: LiveData<AlbumApiStatus>
-        get() = _status
+    private val _albums: LiveData<List<Album>> = albumRepository.allAlbums
+    val albums: LiveData<List<Album>>
+        get() = _albums
 
-    private val _response: LiveData<List<Album>> = albumRepository.allAlbums
-    val response: LiveData<List<Album>>
-        get() = _response
+    private val _adapterAlbums: LiveData<List<DataItem>> = Transformations.map(albums, Function {
+        return@Function addHeaderAndSubmitList(it)
+    })
+    val adapterAlbums: LiveData<List<DataItem>>
+        get() = _adapterAlbums
 
-    companion object {
-        private const val TAG: String = "AlbumListViewModel"
-    }
-
-    init {
-        viewModelScope.launch {
-            albumRepository.fetchAlbums()
+    private fun addHeaderAndSubmitList(list: List<Album>?): List<DataItem> {
+        return when (list) {
+            null -> listOf()
+            else -> addheaders(list.map { DataItem.AlbumItem(it) })
         }
     }
 
-    enum class AlbumApiStatus { LOADING, ERROR, DONE }
+    private fun addheaders(list: List<DataItem>): List<DataItem> {
+        val mutList = list.toMutableList()
+        val iterator = mutList.listIterator()
+        var albumId: Int = Int.MIN_VALUE
+        for (item in iterator) {
+            item as DataItem.AlbumItem
+            if (item.album.albumId != null && albumId != item.album.albumId) {
+                albumId = item.album.albumId
+                iterator.previous()
+                iterator.add(DataItem.HeaderItem(item.album.albumId))
+                iterator.next()
+            }
+        }
+
+        return mutList.toList()
+    }
 }

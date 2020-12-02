@@ -1,6 +1,5 @@
 package com.example.leboncoinexamen.framework.presentation.album
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,38 +10,21 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.leboncoinexamen.R
 import com.example.leboncoinexamen.domain.model.Album
 import com.squareup.picasso.Picasso
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.lang.String
 
-class AlbumAdapter(private val context: Context, private val listener: AlbumClickListener) :
+class AlbumAdapter(private val listener: AlbumClickListener) :
     ListAdapter<DataItem, RecyclerView.ViewHolder>(AlbumDiffCallback()) {
-    private val adapterScope = CoroutineScope(Dispatchers.Default)
 
     companion object {
         const val ITEM_VIEW_TYPE_HEADER = 0
         const val ITEM_VIEW_TYPE_ITEM = 1
     }
 
-    fun addHeaderAndSubmitList(list: List<Album>?) {
-        adapterScope.launch {
-            val items = when (list) {
-                null -> listOf(DataItem.HeaderItem(0))
-                else -> addheaders(list.map { DataItem.AlbumItem(it) })
-            }
-            withContext(Dispatchers.Main) {
-                submitList(items)
-            }
-        }
-    }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
             ITEM_VIEW_TYPE_HEADER -> TextViewHolder.from(parent)
             ITEM_VIEW_TYPE_ITEM -> ViewHolder.from(parent)
-            else -> throw ClassCastException("Unknown viewType ${viewType}")
+            else -> throw ClassCastException("Unknown viewType $viewType")
         }
     }
 
@@ -67,13 +49,9 @@ class AlbumAdapter(private val context: Context, private val listener: AlbumClic
     }
 
     class TextViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        var header: TextView
+        private var header: TextView = view.findViewById(R.id.text)
         fun bind(albumId: Int) {
             header.text = header.context.getString(R.string.header_text, albumId.toString())
-        }
-
-        init {
-            header = view.findViewById(R.id.text)
         }
 
         companion object {
@@ -85,9 +63,8 @@ class AlbumAdapter(private val context: Context, private val listener: AlbumClic
         }
     }
 
-    class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
-        var image: ImageView
-        //var progress: ProgressBar
+    class ViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
+        private var image: ImageView = view.findViewById(R.id.image)
 
         fun bind(item: Album, clickListener: AlbumClickListener) {
 
@@ -105,11 +82,6 @@ class AlbumAdapter(private val context: Context, private val listener: AlbumClic
 
         }
 
-        init {
-            image = view.findViewById(R.id.image)
-            //progress = view.findViewById(R.id.progress)
-        }
-
         companion object {
             fun from(parent: ViewGroup): ViewHolder {
                 val layoutInflater = LayoutInflater.from(parent.context)
@@ -122,22 +94,5 @@ class AlbumAdapter(private val context: Context, private val listener: AlbumClic
 
     class AlbumClickListener(val clickListener: (view: View, album: Album) -> Unit) {
         fun onClick(view: View, album: Album) = clickListener(view, album)
-    }
-
-    fun addheaders(list: List<DataItem>): List<DataItem> {
-        val mutList = list.toMutableList()
-        val iterator = mutList.listIterator()
-        var albumId: Int = Int.MIN_VALUE
-        for (item in iterator) {
-            item as DataItem.AlbumItem
-            if (item.album.albumId != null && albumId != item.album.albumId) {
-                albumId = item.album.albumId
-                iterator.previous()
-                iterator.add(DataItem.HeaderItem(item.album.albumId))
-                iterator.next()
-            }
-        }
-
-        return mutList.toList()
     }
 }

@@ -4,14 +4,10 @@ import androidx.fragment.app.Fragment
 import com.example.leboncoinexamen.di.ApplicationComponent
 
 open class BaseFragment : Fragment() {
-    /*fun getAppComponent(): ApplicationComponent {
-        return activity?.run {
-            (application as MyApplication).getApplicationComponent()
-        } ?: throw Exception("AppComponent is null.")
-    }*/
-    fun getAppComponent(): ApplicationComponent{
+
+    fun getAppComponent(): ApplicationComponent {
         return activity?.run {
             (application as MyApplication).mApplicationComponent
-        }?: throw Exception("AppComponent is null.")
+        } ?: throw Exception("AppComponent is null.")
     }
 }

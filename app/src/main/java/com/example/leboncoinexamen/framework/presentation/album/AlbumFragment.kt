@@ -8,11 +8,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnLayoutChangeListener
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.SharedElementCallback
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.FragmentNavigatorExtras
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.NavigationUI
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionInflater
@@ -32,68 +34,83 @@ class AlbumFragment : BaseFragment() {
 
     @Inject
     lateinit var viewModelProvider: ViewModelProvider.Factory
-    private lateinit var binding: FragmentAlbumListBinding
+    private var binding: FragmentAlbumListBinding? = null
     private lateinit var viewModel: AlbumViewModel
     private var mListState: Parcelable? = null
+
+    private val listener: AlbumAdapter.AlbumClickListener =
+        AlbumAdapter.AlbumClickListener { view: View, album: Album ->
+            run {
+
+                MainActivity.currentPosition = viewModel.albums.value!!.indexOf(album)
+                val action =
+                    AlbumFragmentDirections.actionAlbumFragmentToPhotoPagerFragment(album)
+                if (this@AlbumFragment.exitTransition != null)
+                    (this@AlbumFragment.exitTransition as TransitionSet).excludeTarget(
+                        view,
+                        true
+                    )
+
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                    val extras = FragmentNavigatorExtras(view to view.transitionName)
+                    Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
+                        .navigate(
+                            action,
+                            extras
+                        )
+                } else {
+                    Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
+                        .navigate(
+                            action
+                        )
+                }
+            }
+        }
 
     companion object {
         private var PORTRAIT_COLUMN_COUNT = 4
         private var LANDSCAPE_COLUMN_COUNT = 8
-        val BUNDLE_KEY = "bundleKey"
+        const val BUNDLE_KEY = "bundleKey"
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         binding = FragmentAlbumListBindingImpl.inflate(inflater)
         viewModel = viewModelProvider.create(AlbumViewModel::class.java)
+        binding!!.viewModel = viewModel
         mListState = savedInstanceState?.getParcelable(BUNDLE_KEY)
-        binding.viewModel = viewModel
 
-        val albumAdapter = AlbumAdapter(
-            requireContext(),
-            AlbumAdapter.AlbumClickListener { view: View, album: Album ->
-                run {
-
-                    MainActivity.currentPosition = viewModel.response.value!!.indexOf(album)
-                    val action =
-                        AlbumFragmentDirections.actionAlbumFragmentToPhotoPagerFragment(album)
-
-                    (this@AlbumFragment.exitTransition as TransitionSet).excludeTarget(view, true)
-
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                        val extras = FragmentNavigatorExtras(view to view.transitionName)
-                        Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
-                            .navigate(
-                                action,
-                                extras
-                            )
-                    } else {
-                        Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
-                            .navigate(
-                                action
-                            )
+        viewModel.adapterAlbums.observe(viewLifecycleOwner, {
+            val albumAdapter = AlbumAdapter(listener)
+            albumAdapter.submitList(it)
+            val manager = GridLayoutManager(context, columnCount)
+            manager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                override fun getSpanSize(position: Int): Int {
+                    return when (albumAdapter.getItemViewType(position)) {
+                        AlbumAdapter.ITEM_VIEW_TYPE_HEADER -> columnCount
+                        AlbumAdapter.ITEM_VIEW_TYPE_ITEM -> 1
+                        else -> 1
                     }
                 }
-            })
+            }
+            binding?.list?.adapter = albumAdapter
+            binding?.list?.layoutManager = manager
 
-        binding.list.adapter = albumAdapter
-
-        binding.lifecycleOwner = this
-
-        viewModel.response.observe(viewLifecycleOwner, Observer {
-            it?.let {
-                albumAdapter.addHeaderAndSubmitList(it)
-                if(mListState!=null) {
-                    binding.list.layoutManager?.onRestoreInstanceState(mListState)
-                    binding.list.adapter?.notifyDataSetChanged()
-                }else{
-                    scrollToCurrentPosition()
-                }
+            if (MainActivity.currentPosition <= 0) {
+                binding?.list?.layoutManager?.onRestoreInstanceState(mListState)
+                binding?.list?.adapter?.notifyDataSetChanged()
+            } else {
+                binding?.list?.adapter?.notifyDataSetChanged()
+                scrollToCurrentPosition()
+                prepareTransitions()
+                MainActivity.currentPosition = 0
             }
         })
+
+        binding!!.lifecycleOwner = this
 
         columnCount = when (requireContext().resources.configuration.orientation) {
             Configuration.ORIENTATION_LANDSCAPE -> LANDSCAPE_COLUMN_COUNT
@@ -101,31 +118,18 @@ class AlbumFragment : BaseFragment() {
             else -> 1
         }
 
-        val manager = GridLayoutManager(context, columnCount)
-        manager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-            override fun getSpanSize(position: Int): Int {
-                return when (albumAdapter.getItemViewType(position)) {
-                    AlbumAdapter.ITEM_VIEW_TYPE_HEADER -> columnCount
-                    AlbumAdapter.ITEM_VIEW_TYPE_ITEM -> 1
-                    else -> 1
-                }
-            }
-        }
-        binding.list.layoutManager = manager
-        prepareTransitions()
-        return binding.root
+        val navController = findNavController()
+
+        NavigationUI.setupActionBarWithNavController(
+            requireActivity() as AppCompatActivity,
+            navController
+        )
+
+        return binding!!.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        //scrollToCurrentPosition()
-    }
-
-    override fun onResume() {
-        super.onResume()
-    }
     private fun getCurrentPosition(): Int {
-        val list = viewModel.response.value
+        val list = viewModel.albums.value
         if (!list.isNullOrEmpty()) {
             return list[MainActivity.currentPosition].albumId?.plus(
                 MainActivity.currentPosition
@@ -134,22 +138,13 @@ class AlbumFragment : BaseFragment() {
         return -1
     }
 
-    /*  private fun fromAdapterPosition(position: ): Int {
-          val list = viewModel.response.value
-          if (!list.isNullOrEmpty()) {
-              MainActivity.currentPosition = list[position].albumId?.plus(
-                  MainActivity.currentPosition
-              )!!
-          }
-      }*/
-
     private fun scrollToCurrentPosition() {
 
         val pos: Int = getCurrentPosition()
         if (pos < 0) {
             return
         }
-        binding.list.addOnLayoutChangeListener(object : OnLayoutChangeListener {
+        binding?.list?.addOnLayoutChangeListener(object : OnLayoutChangeListener {
             override fun onLayoutChange(
                 v: View,
                 left: Int,
@@ -161,22 +156,21 @@ class AlbumFragment : BaseFragment() {
                 oldRight: Int,
                 oldBottom: Int
             ) {
-                binding.list.removeOnLayoutChangeListener(this)
-                val layoutManager: RecyclerView.LayoutManager = binding.list.layoutManager!!
+                binding?.list?.removeOnLayoutChangeListener(this)
+                val layoutManager: RecyclerView.LayoutManager = binding?.list?.layoutManager!!
                 val viewAtPosition = layoutManager.findViewByPosition(pos)
-                // Scroll to position if the view for the current position is null (not currently part of
-                // layout manager children), or it's not completely visible.
+
                 if (viewAtPosition == null || layoutManager
                         .isViewPartiallyVisible(viewAtPosition, false, true)
                 ) {
-                    binding.list.post { layoutManager.scrollToPosition(pos) }
+                    binding?.list?.post { layoutManager.scrollToPosition(pos) }
                 }
             }
         })
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putParcelable(BUNDLE_KEY, binding.list.layoutManager?.onSaveInstanceState())
+        outState.putParcelable(BUNDLE_KEY, binding?.list?.layoutManager?.onSaveInstanceState())
         super.onSaveInstanceState(outState)
     }
 
@@ -189,19 +183,16 @@ class AlbumFragment : BaseFragment() {
         exitTransition = TransitionInflater.from(context)
             .inflateTransition(R.transition.grid_exit_transition)
 
-        // A similar mapping is set at the ImagePagerFragment with a setEnterSharedElementCallback.
         setExitSharedElementCallback(
             object : SharedElementCallback() {
                 override fun onMapSharedElements(
                     names: List<String>,
                     sharedElements: MutableMap<String, View>
                 ) {
-                    // Locate the ViewHolder for the clicked position.
-                    val selectedViewHolder: RecyclerView.ViewHolder = binding.list
-                        .findViewHolderForAdapterPosition(getCurrentPosition())
-                        ?: return
+                    val selectedViewHolder: RecyclerView.ViewHolder =
+                        binding?.list?.findViewHolderForAdapterPosition(getCurrentPosition())
+                            ?: return
 
-                    // Map the first shared element name to the child ImageView.
                     sharedElements[names[0]] =
                         selectedViewHolder.itemView.findViewById(R.id.image)
                 }

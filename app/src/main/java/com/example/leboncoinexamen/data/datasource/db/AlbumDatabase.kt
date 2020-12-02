@@ -18,24 +18,6 @@ abstract class AlbumDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: AlbumDatabase? = null
 
-        fun getInstance(context: Context): AlbumDatabase {
-            synchronized(this) {
-                var instance = INSTANCE
-
-                if (instance == null) {
-                    instance = Room.databaseBuilder(
-                        context.applicationContext,
-                        AlbumDatabase::class.java,
-                        "album_database"
-                    )
-                        .fallbackToDestructiveMigration()
-                        .build()
-                    INSTANCE = instance
-                }
-                return instance
-            }
-        }
-
         fun getDatabase(
             context: Context
         ): AlbumDatabase {

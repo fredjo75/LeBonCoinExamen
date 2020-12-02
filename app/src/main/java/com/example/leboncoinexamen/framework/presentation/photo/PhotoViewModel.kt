@@ -11,7 +11,7 @@ import javax.inject.Singleton
 class PhotoViewModel
 @Inject
 constructor(
-    private val albumRepository: AlbumRepository
+    albumRepository: AlbumRepository
 ) : ViewModel() {
     private val _response: LiveData<List<Album>> = albumRepository.allAlbums
     val response: LiveData<List<Album>>

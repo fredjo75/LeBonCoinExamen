@@ -2,15 +2,12 @@ package com.example.leboncoinexamen.data.reporitory
 
 import com.example.leboncoinexamen.data.datasource.db.AlbumDatabaseDOA
 import com.example.leboncoinexamen.data.datasource.db.model.DbAlbum
+import com.example.leboncoinexamen.data.datasource.network.AlbumApiService
 import com.example.leboncoinexamen.data.datasource.network.model.NetworkAlbum
-import com.example.leboncoinexamen.data.network.AlbumApiService
 import com.example.leboncoinexamen.data.oop.mapper.Mapper
 import com.example.leboncoinexamen.domain.model.Album
 import com.nhaarman.mockitokotlin2.mock
 import junit.framework.TestCase
-import org.mockito.ArgumentCaptor
-import org.mockito.Captor
-import retrofit2.Call
 
 
 class AlbumRepositoryImplTest : TestCase() {
@@ -21,12 +18,7 @@ class AlbumRepositoryImplTest : TestCase() {
     private val dbMapper: Mapper<DbAlbum, Album> = mock()
     private val networkMapper: Mapper<NetworkAlbum, DbAlbum> = mock()
 
-    @Captor
-    private val callbackArgumentCaptor: ArgumentCaptor<Call<List<NetworkAlbum>>>? = null
-
-    private val sut = AlbumRepositoryImpl(albumDao, albumApiService, dbMapper, networkMapper)
-
-/*    fun test_allAlbums_should_return_albums_when_albumDao_returns() {
+    /*    fun test_allAlbums_should_return_albums_when_albumDao_returns() {
         val networkAlbum = NetworkAlbum(null, null, null, null, null)
         val dbAlbum = DbAlbum(0, 0, "", "", "")
 

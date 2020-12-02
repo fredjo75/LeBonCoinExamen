@@ -2,13 +2,12 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/nav_graph"
     app:startDestination="@id/albumFragment">
 
     <fragment
         android:id="@+id/albumFragment"
         android:name="com.example.leboncoinexamen.framework.presentation.album.AlbumFragment"
-        android:label="fragment_album_list"
+        android:label="Mes Albums Photo"
         tools:layout="@layout/fragment_album_list">
         <action
             android:id="@+id/action_albumFragment_to_photoPagerFragment"
@@ -17,8 +16,8 @@
     <fragment
         android:id="@+id/photoPagerFragment"
         android:name="com.example.leboncoinexamen.framework.presentation.photo.PhotoPagerFragment"
-        android:label="fragment_pager_photo"
-        tools:layout="@layout/fragment_photo_pager" >
+        android:label="Ma Photo"
+        tools:layout="@layout/fragment_photo_pager">
         <argument
             android:name="selectedAlbum"
             app:argType="com.example.leboncoinexamen.domain.model.Album" />
