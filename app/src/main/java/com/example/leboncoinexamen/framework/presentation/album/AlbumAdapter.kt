@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.leboncoinexamen.R
 import com.example.leboncoinexamen.domain.model.Album
 import com.squareup.picasso.Picasso
-import java.lang.String
 
 class AlbumAdapter(private val listener: AlbumClickListener) :
     ListAdapter<DataItem, RecyclerView.ViewHolder>(AlbumDiffCallback()) {
@@ -69,7 +68,7 @@ class AlbumAdapter(private val listener: AlbumClickListener) :
         fun bind(item: Album, clickListener: AlbumClickListener) {
 
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                image.transitionName = String.valueOf(item.id)
+                image.transitionName = item.id.toString()
             }
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
                 Picasso.get().load(item.thumbnailUrl).placeholder(R.drawable.ic_launcher_foreground)

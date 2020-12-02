@@ -11,7 +11,6 @@ import com.example.leboncoinexamen.R
 import com.example.leboncoinexamen.domain.model.Album
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
-import java.lang.String
 
 class PhotoFragment : Fragment() {
     override fun onCreateView(
@@ -25,7 +24,7 @@ class PhotoFragment : Fragment() {
         val textView = view.findViewById<View>(R.id.text) as TextView
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            imageView.transitionName = String.valueOf(photo.id)
+            imageView.transitionName = photo.id.toString()
         }
         Picasso.get().load(photo.url).into(imageView, object : Callback {
             override fun onSuccess() {
