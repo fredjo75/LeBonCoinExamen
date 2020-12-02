@@ -7,7 +7,7 @@ This is a hiring test project for a vacancy at LeBonCoin.fr.
 For the development of this app I tried to follow the clean architecture recommendations as it helps to build a clean, robust, easily understandable and modular code base. It is also advertised by google and widely adopted by android developers. 
 
 <h2>Pattern</h2>
-For the pattern, I choose VMMV as it is low depency ( especially with Dagger) , easily testable and modular.
+For the pattern, I choose MVVM as it is low depency ( especially with Dagger) , easily testable and modular.
 
 <h2>Libraries</h2>
 
